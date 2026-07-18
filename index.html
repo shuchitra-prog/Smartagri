@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app_title">Smart Agriculture System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --accent-color: #ff9800;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color) !important;
+        }
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);
+        }
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .prediction-result {
+            background: linear-gradient(45deg, #e8f5e9, #c8e6c9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .scheme-card {
+            height: 100%;
+            border-top: 4px solid var(--accent-color);
+        }
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        }
+        .language-flag {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-seedling me-2"></i>
+                <span data-i18n="app_title">Smart Agriculture System</span>
+            </a>
+            <div class="language-selector">
+                <select id="languageSelect" class="form-select form-select-sm">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="ml">മലയാളം</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Left Column: Input Form -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0" data-i18n="enter_details">Enter Farming Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div class="mb-3">
+                                <label for="temperature" class="form-label" data-i18n="temperature">Temperature (°C)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-thermometer-half"></i></span>
+                                    <input type="number" step="0.1" class="form-control" id="temperature" 
+                                           placeholder="Enter temperature" min="-10" max="50" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="humidity" class="form-label" data-i18n="humidity">Humidity (%)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tint"></i></span>
+                                    <input type="number" step="0.1" class="form-control" id="humidity" 
+                                           placeholder="Enter humidity" min="0" max="100" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rainfall" class="form-label" data-i18n="rainfall">Rainfall (mm)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-cloud-rain"></i></span>
+                                    <input type="number" step="0.1" class="form-control" id="rainfall" 
+                                           placeholder="Enter rainfall" min="0" max="1000" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="soil_moisture" class="form-label" data-i18n="soil_moisture">Soil Moisture (%)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-water"></i></span>
+                                    <input type="number" step="0.1" class="form-control" id="soil_moisture" 
+                                           placeholder="Enter soil moisture" min="0" max="100" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="soil_ph" class="form-label" data-i18n="soil_ph">Soil pH</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-flask"></i></span>
+                                    <input type="number" step="0.1" class="form-control" id="soil_ph" 
+                                           placeholder="Enter soil pH" min="0" max="14" required>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" data-i18n="predict">
+                                    <i class="fas fa-brain me-2"></i>Predict
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()" data-i18n="reset">
+                                    <i class="fas fa-redo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Loading Spinner -->
+                        <div id="loading" class="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden" data-i18n="loading">Loading...</span>
+                            </div>
+                            <p class="mt-2" data-i18n="loading">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ANN Explanation -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0" data-i18n="ann_explanation">How ANN Works</h5>
+                    </div>
+                    <div class="card-body">
+                        <p id="annExplanation" data-i18n="ann_explanation_text">
+                            ANN works like a human brain. It learns from past farming data and predicts best crop, irrigation and yield.
+                        </p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadANNExplanation()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            <span data-i18n="refresh">Refresh Explanation</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Results & Schemes -->
+            <div class="col-lg-6">
+                <!-- Prediction Results -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0" data-i18n="prediction_results">Prediction Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="results" style="display: none;">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-seedling"></i>
+                                    </div>
+                                    <h6 data-i18n="crop_recommendation">Crop Recommendation</h6>
+                                    <h4 id="cropResult" class="text-success">-</h4>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-tint"></i>
+                                    </div>
+                                    <h6 data-i18n="irrigation_method">Irrigation Method</h6>
+                                    <h4 id="irrigationResult" class="text-primary">-</h4>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h6 data-i18n="expected_yield">Expected Yield</h6>
+                                    <h4 id="yieldResult" class="text-warning">-</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="noResults" class="text-center text-muted">
+                            <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                            <p data-i18n="enter_predict">Enter values and click Predict to see results</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Government Schemes -->
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" data-i18n="govt_schemes">Government Schemes</h5>
+                        <button class="btn btn-sm btn-outline-success" onclick="loadSchemes()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            <span data-i18n="refresh">Refresh</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="schemesList" class="row">
+                            <!-- Schemes will be loaded here -->
+                            <div class="text-center">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2" data-i18n="loading">Loading schemes...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentLanguage = 'en';
+        let translations = {};
+
+        // Load translations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTranslations('en');
+            loadSchemes();
+            loadANNExplanation();
+        });
+
+        // Language selector change
+        document.getElementById('languageSelect').addEventListener('change', function(e) {
+            currentLanguage = e.target.value;
+            loadTranslations(currentLanguage);
+        });
+
+        // Load translations from server
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch('/translate_ui', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ lang: lang })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    translations = data.translations;
+                    updateUIWithTranslations();
+                    
+                    // Also update schemes and ANN explanation
+                    loadSchemes();
+                    loadANNExplanation();
+                }
+            } catch (error) {
+                console.error('Error loading translations:', error);
+            }
+        }
+
+        // Update all translatable elements
+        function updateUIWithTranslations() {
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[key]) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = translations[key];
+                    } else {
+                        element.textContent = translations[key];
+                    }
+                }
+            });
+            
+            // Update title
+            if (translations['app_title']) {
+                document.title = translations['app_title'];
+            }
+        }
+
+        // Form submission for prediction
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            
+            try {
+                const formData = {
+                    temperature: document.getElementById('temperature').value,
+                    humidity: document.getElementById('humidity').value,
+                    rainfall: document.getElementById('rainfall').value,
+                    soil_moisture: document.getElementById('soil_moisture').value,
+                    soil_ph: document.getElementById('soil_ph').value
+                };
+                
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success) {
+                    // Translate crop and irrigation if not English
+                    let crop = data.crop;
+                    let irrigation = data.irrigation;
+                    
+                    if (currentLanguage !== 'en') {
+                        const cropTrans = await translateText(crop, currentLanguage);
+                        const irrigationTrans = await translateText(irrigation, currentLanguage);
+                        crop = cropTrans.success ? cropTrans.translated : crop;
+                        irrigation = irrigationTrans.success ? irrigationTrans.translated : irrigation;
+                    }
+                    
+                    // Display results
+                    document.getElementById('cropResult').textContent = crop;
+                    document.getElementById('irrigationResult').textContent = irrigation;
+                    document.getElementById('yieldResult').textContent = data.yield + ' tons/ha';
+                    
+                    document.getElementById('results').style.display = 'block';
+                    document.getElementById('noResults').style.display = 'none';
+                } else {
+                    alert(translations['error'] || 'Error: ' + data.error);
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                alert(translations['error'] || 'Error: ' + error.message);
+            }
+        });
+
+        // Load government schemes
+        async function loadSchemes() {
+            try {
+                const response = await fetch(`/schemes?lang=${currentLanguage}`);
+                const schemes = await response.json();
+                
+                const schemesList = document.getElementById('schemesList');
+                schemesList.innerHTML = '';
+                
+                schemes.forEach(scheme => {
+                    const schemeCard = `
+                        <div class="col-md-6 mb-3">
+                            <div class="card scheme-card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">${scheme.title}</h6>
+                                    <p class="card-text small">${scheme.description}</p>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <a href="${scheme.link}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        ${translations['scheme_link'] || 'Learn More'}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    schemesList.innerHTML += schemeCard;
+                });
+            } catch (error) {
+                console.error('Error loading schemes:', error);
+            }
+        }
+
+        // Load ANN explanation
+        async function loadANNExplanation() {
+            try {
+                const response = await fetch(`/ann_explanation?lang=${currentLanguage}`);
+                const data = await response.json();
+                document.getElementById('annExplanation').textContent = data.text;
+            } catch (error) {
+                console.error('Error loading ANN explanation:', error);
+            }
+        }
+
+        // Translate individual text
+        async function translateText(text, targetLang) {
+            try {
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        lang: targetLang
+                    })
+                });
+                return await response.json();
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('predictionForm').reset();
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('noResults').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

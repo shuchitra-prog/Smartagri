@@ -1,0 +1,9 @@
+flask>=2.3
+tensorflow
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.4
+joblib
+deep-translator
+flask-cors
+python-dotenv
