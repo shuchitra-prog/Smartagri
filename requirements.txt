@@ -1,8 +1,0 @@
-flask
-tensorflow
-numpy
-pandas
-scikit-learn>=1.5.0
-joblib
-deep-translator
-flask-cors
